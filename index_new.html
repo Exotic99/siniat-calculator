@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SINIAT HYDRO Calculator</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    background: #f8f8f7;
+    color: #1a1a18;
+    padding: 16px;
+    line-height: 1.5;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e5e2;
+  }
+  .header h1 { font-size: 15px; font-weight: 600; }
+  .header-sub { font-size: 11px; color: #888; margin-top: 1px; }
+  .badge-hydro {
+    background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;
+    font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* Products */
+  .products { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .prod {
+    background: #fff; border: 1px solid #e5e5e2; border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .prod-tag {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    padding: 2px 6px; border-radius: 3px; margin-bottom: 5px;
+  }
+  .tag-ak  { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .tag-rk  { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .tag-rk2 { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .prod-name { font-size: 12px; font-weight: 600; margin-bottom: 1px; }
+  .prod-dim { font-size: 10px; color: #888; margin-bottom: 6px; }
+  .prod-prices { display: flex; flex-direction: column; gap: 1px; }
+  .prod-price-row { display: flex; justify-content: space-between; font-size: 11px; color: #666; }
+  .prod-price-row strong { color: #1a1a18; }
+
+  /* Section label */
+  .section-label {
+    font-size: 10px; font-weight: 600; color: #888;
+    text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 7px;
+  }
+
+  /* Wall list */
+  .walls { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .wall-row {
+    display: grid;
+    grid-template-columns: 80px 62px 62px 1fr 26px;
+    gap: 5px;
+    align-items: end;
+    background: #fff;
+    border: 1px solid #e5e5e2;
+    border-radius: 7px;
+    padding: 7px 9px;
+  }
+  .field label { font-size: 10px; color: #999; display: block; margin-bottom: 2px; }
+  .field input, .field select {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    padding: 4px 6px;
+    font-size: 12px;
+    background: #fafafa;
+    color: #1a1a18;
+    outline: none;
+  }
+  .field input:focus, .field select:focus {
+    border-color: #2563eb;
+    background: #fff;
+  }
+  .wall-count {
+    font-size: 11px; color: #666; text-align: right;
+    padding-bottom: 4px; align-self: end;
+  }
+  .rm-btn {
+    background: none; border: 1px solid #e5e5e2; border-radius: 5px;
+    width: 26px; height: 26px; cursor: pointer; color: #aaa;
+    font-size: 14px; display: flex; align-items: center; justify-content: center;
+    align-self: end;
+  }
+  .rm-btn:hover { border-color: #fca5a5; color: #ef4444; }
+
+  .add-btn {
+    width: 100%; background: none; border: 1px dashed #d1d5db;
+    border-radius: 7px; padding: 7px; font-size: 12px; color: #888;
+    cursor: pointer; margin-bottom: 12px;
+  }
+  .add-btn:hover { background: #f3f4f6; color: #555; }
+
+  .empty {
+    text-align: center; padding: 18px; color: #bbb; font-size: 12px;
+    border: 1px dashed #d1d5db; border-radius: 7px; margin-bottom: 8px;
+  }
+
+  /* Options */
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .opt-box {
+    background: #fff; border: 1px solid #e5e5e2; border-radius: 7px;
+    padding: 8px 10px;
+  }
+  .opt-box label { font-size: 11px; color: #666; display: block; margin-bottom: 4px; }
+  .opt-box input {
+    width: 100%; border: 1px solid #d1d5db; border-radius: 5px;
+    padding: 4px 7px; font-size: 13px; background: #fafafa; color: #1a1a18;
+  }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 10px; }
+  .stat { background: #fff; border: 1px solid #e5e5e2; border-radius: 7px; padding: 9px 11px; }
+  .stat-lbl { font-size: 10px; color: #888; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .04em; }
+  .stat-val { font-size: 16px; font-weight: 600; color: #1a1a18; }
+  .stat-sub { font-size: 10px; color: #bbb; margin-top: 1px; }
+
+  /* Totals */
+  .totals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 10px; }
+  .total-card {
+    background: #fff; border: 1px solid #e5e5e2; border-radius: 7px;
+    padding: 9px 12px;
+  }
+  .total-card.ak  { border-left: 3px solid #2563eb; }
+  .total-card.rk  { border-left: 3px solid #16a34a; }
+  .total-card.rk2 { border-left: 3px solid #b45309; }
+  .total-lbl { font-size: 10px; color: #888; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+  .total-val { font-size: 15px; font-weight: 600; color: #1a1a18; }
+  .total-sub { font-size: 10px; color: #aaa; margin-top: 2px; }
+
+  /* Grand total */
+  .grand {
+    background: #1a1a18; color: #fff; border-radius: 8px;
+    padding: 11px 14px; display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 12px;
+  }
+  .grand-lbl { font-size: 12px; color: #aaa; }
+  .grand-val { font-size: 20px; font-weight: 700; }
+
+  /* Breakdown */
+  .bkdown {
+    background: #fff; border: 1px solid #e5e5e2; border-radius: 8px;
+    overflow: hidden; margin-bottom: 12px;
+  }
+  .bkrow {
+    display: grid; grid-template-columns: 22px 1fr 55px 70px;
+    gap: 5px; padding: 7px 10px;
+    border-bottom: 1px solid #f0f0ee; font-size: 11px; align-items: center;
+  }
+  .bkrow:last-child { border-bottom: none; }
+  .bkrow.hdr {
+    background: #f8f8f7; font-size: 10px; color: #888;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .idx {
+    background: #f0f0ee; border-radius: 3px;
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; color: #666;
+  }
+
+  /* Footer */
+  .footer {
+    font-size: 10px; color: #bbb; display: flex; flex-wrap: wrap; gap: 10px;
+    padding-top: 10px; border-top: 1px solid #f0f0ee;
+  }
+  .footer a { color: #888; text-decoration: none; }
+  .footer a:hover { color: #555; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .products { grid-template-columns: 1fr; }
+    .totals { grid-template-columns: 1fr; }
+    .wall-row { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+    .wall-count { display: none; }
+    .stats { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>SINIAT HYDRO Calculator</h1>
+    <div class="header-sub">Vochtige ruimtes · Hornbach · prijzen incl. BTW</div>
+  </div>
+  <span class="badge-hydro">H2 / NEN EN 520</span>
+</div>
+
+<!-- Products -->
+<div class="section-label">Beschikbare platen bij Hornbach</div>
+<div class="products">
+  <div class="prod">
+    <span class="prod-tag tag-ak">Afgeschuinde kant</span>
+    <div class="prod-name">Wandplaat HYDRO AK</div>
+    <div class="prod-dim">2600 × 600 × 12,5 mm · 1,56 m²/st · art. 8908016</div>
+    <div class="prod-prices">
+      <div class="prod-price-row"><span>1–99 stuks</span><strong>€ 11,25</strong></div>
+      <div class="prod-price-row"><span>v.a. 100 stuks</span><strong>€ 10,20</strong></div>
+    </div>
+  </div>
+  <div class="prod">
+    <span class="prod-tag tag-rk">Ronde kant</span>
+    <div class="prod-name">Plafondplaat HYDRO RK</div>
+    <div class="prod-dim">1200 × 600 × 9,5 mm · 0,72 m²/st · art. 8415052</div>
+    <div class="prod-prices">
+      <div class="prod-price-row"><span>1–99 stuks</span><strong>€ 4,50</strong></div>
+      <div class="prod-price-row"><span>v.a. 100 stuks</span><strong>€ 4,25</strong></div>
+    </div>
+  </div>
+  <div class="prod">
+    <span class="prod-tag tag-rk2">Ronde kant</span>
+    <div class="prod-name">Plafondplaat HYDRO RK²</div>
+    <div class="prod-dim">2600 × 600 × 9,5 mm · 1,56 m²/st · art. 8415053</div>
+    <div class="prod-prices">
+      <div class="prod-price-row"><span>1–99 stuks</span><strong>€ 9,75</strong></div>
+      <div class="prod-price-row"><span>v.a. 100 stuks</span><strong>€ 9,25</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- Walls -->
+<div class="section-label">Vlakken / wanden</div>
+<div class="walls" id="wall-list">
+  <div class="empty" id="empty-msg">Klik op "+ Vlak toevoegen" om te beginnen</div>
+</div>
+<button class="add-btn" onclick="addWall()">+ Vlak / wand toevoegen</button>
+
+<!-- Options -->
+<div class="opts">
+  <div class="opt-box">
+    <label>Uitvalpercentage (%)</label>
+    <input type="number" id="waste" value="10" min="0" max="50" step="1" oninput="calc()">
+  </div>
+  <div class="opt-box">
+    <label>Aftrek openingen (m²)</label>
+    <input type="number" id="openings" value="0" min="0" step="0.1" oninput="calc()">
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-lbl">Netto opp.</div>
+    <div class="stat-val" id="s-net">0,00 m²</div>
+    <div class="stat-sub">na aftrek openingen</div>
+  </div>
+  <div class="stat">
+    <div class="stat-lbl">Bruto opp.</div>
+    <div class="stat-val" id="s-gross">0,00 m²</div>
+    <div class="stat-sub">incl. uitval</div>
+  </div>
+  <div class="stat">
+    <div class="stat-lbl">Totaal stuks</div>
+    <div class="stat-val" id="s-count">0</div>
+    <div class="stat-sub">beide typen</div>
+  </div>
+</div>
+
+<!-- Per-product totals -->
+<div class="totals">
+  <div class="total-card ak">
+    <div class="total-lbl"><span class="prod-tag tag-ak" style="font-size:10px;padding:1px 5px">AK</span> Wandplaat HYDRO</div>
+    <div class="total-val" id="t-ak-count">0 stuks</div>
+    <div class="total-sub" id="t-ak-price">€ 0,00</div>
+  </div>
+  <div class="total-card rk">
+    <div class="total-lbl"><span class="prod-tag tag-rk" style="font-size:10px;padding:1px 5px">RK</span> Plafondplaat HYDRO</div>
+    <div class="total-val" id="t-rk-count">0 stuks</div>
+    <div class="total-sub" id="t-rk-price">€ 0,00</div>
+  </div>
+  <div class="total-card rk2">
+    <div class="total-lbl"><span class="prod-tag tag-rk2" style="font-size:10px;padding:1px 5px">RK²</span> Plafondplaat HYDRO</div>
+    <div class="total-val" id="t-rk2-count">0 stuks</div>
+    <div class="total-sub" id="t-rk2-price">€ 0,00</div>
+  </div>
+</div>
+
+<!-- Grand total -->
+<div class="grand">
+  <span class="grand-lbl">Totale materiaalkosten</span>
+  <span class="grand-val" id="grand-total">€ 0,00</span>
+</div>
+
+<!-- Breakdown -->
+<div id="bkdown-wrap" style="display:none">
+  <div class="section-label">Detail per vlak</div>
+  <div class="bkdown">
+    <div class="bkrow hdr">
+      <span></span><span>Vlak</span><span style="text-align:right">Stuks</span><span style="text-align:right">Kosten</span>
+    </div>
+    <div id="bkdown-rows"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="https://www.hornbach.nl/p/siniat-gipswandplaat-hydro-afgeschuinde-kant-voor-vochtige-ruimte-2600-x-600-x-12-5-mm/8908016/" target="_blank">Wandplaat AK op Hornbach →</a>
+  <a href="https://www.hornbach.nl/p/siniat-gipsplafondplaat-hydro-ronde-kant-voor-vochtige-ruimte-1200-x-600-x-9-5-mm/8415052/" target="_blank">Plafondplaat RK (1200mm) →</a>
+  <a href="https://www.hornbach.nl/p/siniat-gipsplafondplaat-hydro-ronde-kant-voor-vochtige-ruimte-2600-x-600-x-9-5-mm/8415053/" target="_blank">Plafondplaat RK² (2600mm) →</a>
+  <span>Prijzen kunnen afwijken — controleer altijd op hornbach.nl</span>
+</div>
+
+<script>
+const PRODUCTS = {
+  AK:  { label: 'Wandplaat HYDRO AK',      area: 1.56, p1: 11.25, p2: 10.20, bulk: 100 },
+  RK:  { label: 'Plafondplaat HYDRO RK',   area: 0.72, p1: 4.50,  p2: 4.25,  bulk: 100 },
+  RK2: { label: 'Plafondplaat HYDRO RK²',  area: 1.56, p1: 9.75,  p2: 9.25,  bulk: 100 }
+};
+let walls = [], wId = 0;
+
+function addWall() {
+  const id = ++wId;
+  walls.push({ id, name: 'Vlak ' + id, w: '', h: '', type: 'AK' });
+  render(); calc();
+}
+
+function removeWall(id) {
+  walls = walls.filter(w => w.id !== id);
+  render(); calc();
+}
+
+function upd(id, field, val) {
+  const w = walls.find(w => w.id === id);
+  if (w) { w[field] = val; calc(); }
+}
+
+function fmt(n) { return n.toFixed(2).replace('.', ','); }
+
+function render() {
+  const el = document.getElementById('wall-list');
+  if (walls.length === 0) {
+    el.innerHTML = '<div class="empty" id="empty-msg">Klik op "+ Vlak toevoegen" om te beginnen</div>';
+    document.getElementById('bkdown-wrap').style.display = 'none';
+    return;
+  }
+  el.innerHTML = walls.map((w, i) => `
+    <div class="wall-row">
+      <div class="field"><label>Naam</label>
+        <input value="${w.name}" oninput="upd(${w.id},'name',this.value)" placeholder="Wand">
+      </div>
+      <div class="field"><label>Breed (m)</label>
+        <input type="number" value="${w.w}" min="0" step="0.01" oninput="upd(${w.id},'w',this.value)" placeholder="0.00">
+      </div>
+      <div class="field"><label>Hoog (m)</label>
+        <input type="number" value="${w.h}" min="0" step="0.01" oninput="upd(${w.id},'h',this.value)" placeholder="0.00">
+      </div>
+      <div class="field"><label>Plaattype</label>
+        <select onchange="upd(${w.id},'type',this.value)">
+          <option value="AK"${w.type==='AK'?' selected':''}>AK – Wand 2600×600 (12,5mm)</option>
+          <option value="RK"${w.type==='RK'?' selected':''}>RK – Plafond 1200×600 (9,5mm)</option>
+          <option value="RK2"${w.type==='RK2'?' selected':''}>RK² – Plafond 2600×600 (9,5mm)</option>
+        </select>
+      </div>
+      <div class="wall-count" id="wc-${w.id}">—</div>
+      <button class="rm-btn" onclick="removeWall(${w.id})">×</button>
+    </div>`).join('');
+}
+
+function calc() {
+  const waste = parseFloat(document.getElementById('waste').value) || 0;
+  const openings = parseFloat(document.getElementById('openings').value) || 0;
+  let totalRaw = 0;
+  walls.forEach(w => { totalRaw += (parseFloat(w.w) || 0) * (parseFloat(w.h) || 0); });
+  const net = Math.max(0, totalRaw - openings);
+  const gross = net * (1 + waste / 100);
+  let akCount = 0, rkCount = 0, rk2Count = 0, bkRows = '';
+
+  walls.forEach((w, i) => {
+    const ww = parseFloat(w.w) || 0, wh = parseFloat(w.h) || 0;
+    const raw = ww * wh;
+    const ratio = totalRaw > 0 ? raw / totalRaw : 0;
+    const g = gross * ratio;
+    const p = PRODUCTS[w.type];
+    const cnt = Math.ceil(g / p.area);
+    if (w.type === 'AK') akCount += cnt; else if (w.type === 'RK') rkCount += cnt; else rk2Count += cnt;
+    const cost = cnt * (cnt >= p.bulk ? p.p2 : p.p1);
+    const wcEl = document.getElementById('wc-' + w.id);
+    if (wcEl) wcEl.textContent = raw > 0 ? cnt + ' st' : '—';
+    const tagClass = w.type === 'AK' ? 'tag-ak' : w.type === 'RK' ? 'tag-rk' : 'tag-rk2';
+    bkRows += `<div class="bkrow">
+      <div class="idx">${i + 1}</div>
+      <div>${w.name || 'Vlak ' + (i+1)}
+        ${ww > 0 && wh > 0 ? '<span style="color:#bbb;font-size:10px;margin-left:4px">' + ww.toFixed(2) + '×' + wh.toFixed(2) + 'm</span>' : ''}
+        <span class="prod-tag ${tagClass}" style="font-size:9px;padding:1px 4px;margin-left:4px">${w.type}</span>
+      </div>
+      <div style="text-align:right">${raw > 0 ? cnt : '—'}</div>
+      <div style="text-align:right;font-weight:600">${raw > 0 ? '€ ' + fmt(cost) : '—'}</div>
+    </div>`;
+  });
+
+  const akPu   = akCount   >= PRODUCTS.AK.bulk  ? PRODUCTS.AK.p2  : PRODUCTS.AK.p1;
+  const rkPu   = rkCount   >= PRODUCTS.RK.bulk  ? PRODUCTS.RK.p2  : PRODUCTS.RK.p1;
+  const rk2Pu  = rk2Count  >= PRODUCTS.RK2.bulk ? PRODUCTS.RK2.p2 : PRODUCTS.RK2.p1;
+  const akTotal = akCount * akPu, rkTotal = rkCount * rkPu, rk2Total = rk2Count * rk2Pu;
+
+  document.getElementById('s-net').textContent = fmt(net) + ' m²';
+  document.getElementById('s-gross').textContent = fmt(gross) + ' m²';
+  document.getElementById('s-count').textContent = akCount + rkCount + rk2Count;
+  document.getElementById('t-ak-count').textContent = akCount + ' stuks';
+  document.getElementById('t-ak-price').textContent = '€ ' + fmt(akTotal) + ' (à € ' + fmt(akPu) + '/st' + (akCount >= PRODUCTS.AK.bulk ? ' bulk' : '') + ')';
+  document.getElementById('t-rk-count').textContent = rkCount + ' stuks';
+  document.getElementById('t-rk-price').textContent = '€ ' + fmt(rkTotal) + ' (à € ' + fmt(rkPu) + '/st' + (rkCount >= PRODUCTS.RK.bulk ? ' bulk' : '') + ')';
+  document.getElementById('t-rk2-count').textContent = rk2Count + ' stuks';
+  document.getElementById('t-rk2-price').textContent = '€ ' + fmt(rk2Total) + ' (à € ' + fmt(rk2Pu) + '/st' + (rk2Count >= PRODUCTS.RK2.bulk ? ' bulk' : '') + ')';
+  document.getElementById('grand-total').textContent = '€ ' + fmt(akTotal + rkTotal + rk2Total);
+
+  if (walls.length > 0) {
+    document.getElementById('bkdown-wrap').style.display = 'block';
+    document.getElementById('bkdown-rows').innerHTML = bkRows;
+  } else {
+    document.getElementById('bkdown-wrap').style.display = 'none';
+  }
+}
+</script>
+</body>
+</html>
